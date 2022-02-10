@@ -12,7 +12,7 @@
 // 4) set the state with it
 
 import { Component } from 'react'
-import { ListGroup } from 'react-bootstrap'
+import { ListGroup, Spinner, Alert } from 'react-bootstrap'
 
 class Reservations extends Component {
   state = {
@@ -20,6 +20,8 @@ class Reservations extends Component {
     // they are going to come as an array, because they can be many!
     reservations: [], // the initial value here is an empty array because
     // we want to map this array in the interface at all times!
+    isLoading: true,
+    isError: false,
   }
 
   // in this case we want to fetch the data as soon as possible
@@ -52,9 +54,14 @@ class Reservations extends Component {
         console.log(data)
         this.setState({
           reservations: data,
+          isLoading: false,
         })
       } else {
-        alert('something went wrong :(')
+        // alert('something went wrong :(')
+        this.setState({
+          isLoading: false,
+          isError: true,
+        })
       }
     } catch (error) {
       console.log(error)
@@ -71,15 +78,28 @@ class Reservations extends Component {
     // })
 
     return (
-      <div className='mb-3'>
+      <div className='mb-3 reservations-container'>
         <h2>BOOKED TABLES:</h2>
         {/* React is VERY declerative! You're just saying: create a list item for every element in the array */}
+        {this.state.isLoading && (
+          <Spinner animation='border' variant='success' className='mb-2' />
+        )}
+        {this.state.isError && (
+          <Alert variant='danger'>Something went wrong 😨</Alert>
+        )}
+        {/* it works! but we need to show it initially, and then hide it when the data is ready... */}
         <ListGroup>
+          {!this.state.isLoading &&
+            !this.state.isError &&
+            this.state.reservations.length === 0 && (
+              <ListGroup.Item>No reservations yet :(</ListGroup.Item>
+            )}
           {this.state.reservations.map((reservation) => (
             <ListGroup.Item key={reservation._id}>
               {/* the ._id is a property created by the DB while storing the resource */}
               {/* it's a unique identifier, basically a long unique string */}
-              {reservation.name}
+              {reservation.name} for {reservation.numberOfPeople} at{' '}
+              {reservation.dateTime}
             </ListGroup.Item>
           ))}
         </ListGroup>
