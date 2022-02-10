@@ -13,6 +13,7 @@
 
 import { Component } from 'react'
 import { ListGroup, Spinner, Alert } from 'react-bootstrap'
+import { parseISO, format } from 'date-fns'
 
 class Reservations extends Component {
   state = {
@@ -98,8 +99,12 @@ class Reservations extends Component {
             <ListGroup.Item key={reservation._id}>
               {/* the ._id is a property created by the DB while storing the resource */}
               {/* it's a unique identifier, basically a long unique string */}
-              {reservation.name} for {reservation.numberOfPeople} at{' '}
-              {reservation.dateTime}
+              {reservation.name} for {reservation.numberOfPeople} on{' '}
+              {format(parseISO(reservation.dateTime), 'do MMMM yyyy - hh:mm')}
+              {/* this is a very ugly string! how can we improve it?*/}
+              {/* for transforming something like "2022-02-10T11:39:00.000Z" into a nice string */}
+              {/* firstly, we need to convert that string into a proper Date object */}
+              {/* format that Date object into a new string, but this time as nice as we want, with the info we want! */}
             </ListGroup.Item>
           ))}
         </ListGroup>
