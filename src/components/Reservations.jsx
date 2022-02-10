@@ -5,6 +5,12 @@
 // every time you fetch data in a react component, you'll need to store
 // the data you grab in your state object
 
+// 1) output the static content
+// 2) link the dynamic part of your interface (the reservations) to your state
+// mapping the generated components from it
+// 3) fetch the data in componentDidMount
+// 4) set the state with it
+
 import { Component } from 'react'
 import { ListGroup } from 'react-bootstrap'
 
@@ -16,10 +22,58 @@ class Reservations extends Component {
     // we want to map this array in the interface at all times!
   }
 
+  // in this case we want to fetch the data as soon as possible
+  // but what's the best place?
+  // we should fetch the data as soon as the component is mounted into the DOM
+
+  componentDidMount = async () => {
+    // what happens if you put code here?
+    // if will be executed as soon as the component finishes the mounting process
+    console.log("I'm fully mounted!")
+    // IT HAPPENS A MOMENT AFTER THE INITIAL RENDER IS COMPLETED!
+    // it will happen JUST ONCE for every loading of this component!
+    // this moment is PERFECT for fetching data...
+    // why?
+    // - it happens after the initial render, so the rendering itself is not blocked by it
+    // - the user can immediately see the static content of the page, with no waiting
+    // - the fetch will happen under the hood
+    // we want the static content first, and then do our expensive operations
+    // the componentDidMount method is perfect for fetching data or doing any expensive operation,
+    // because they will not make the page wait and the user will already see something :)
+
+    // so what now?
+    // we'll put the fetch here, grab the data and save it into the state
+    try {
+      let response = await fetch(
+        'https://striveschool-api.herokuapp.com/api/reservation'
+      )
+      if (response.ok) {
+        let data = await response.json()
+        console.log(data)
+        this.setState({
+          reservations: data,
+        })
+      } else {
+        alert('something went wrong :(')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   render() {
+    console.log("I'm rendering!")
+    // react will call AGAIN render() every time you set the state or the props change
+
+    // this.setState({
+    //   // <-- NEVER DO THIS! this leads to an infinite loop :(
+    //   reservations: [], // because setting the state will invoke render() again automatically
+    // })
+
     return (
       <div className='mb-3'>
         <h2>BOOKED TABLES:</h2>
+        {/* React is VERY declerative! You're just saying: create a list item for every element in the array */}
         <ListGroup>
           {this.state.reservations.map((reservation) => (
             <ListGroup.Item key={reservation._id}>
